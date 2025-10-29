@@ -11,7 +11,7 @@ services:
     environment:
       FLASK_APP: app
       FLASK_ENV: development
-      DATABASE_URL: sqlite:///instance/mtxman.db
+      # Don't set DATABASE_URL - let config.py use absolute path
       SECRET_KEY: dev-secret-key-change-in-production
       LDAP_HOST: ${LDAP_HOST:-ldap://your-ad-server}
       LDAP_PORT: ${LDAP_PORT:-389}
@@ -26,7 +26,7 @@ services:
       - sqlite_data:/app/instance
     ports:
       - "5000:5000"
-    command: python app.py
+    command: sh -c "python init_sqlite.py --skip-prompt && python app.py"
 
   # Optional: MediaMTX server for testing
   mediamtx:

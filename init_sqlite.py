@@ -16,7 +16,7 @@ os.makedirs(instance_path, exist_ok=True)
 from app import create_app, db
 from app.models.user import User
 
-def init_sqlite_db():
+def init_sqlite_db(skip_prompt=False):
     """Initialize SQLite database and optionally create admin user"""
     print("Initializing SQLite database...")
 
@@ -26,6 +26,23 @@ def init_sqlite_db():
         # Create all tables
         db.create_all()
         print("✓ Database tables created successfully!")
+
+        # Check if any users exist
+        existing_users = User.query.count()
+
+        if existing_users > 0:
+            print(f"✓ Database already has {existing_users} user(s)")
+            if not skip_prompt:
+                print("\n" + "="*60)
+                print("Database initialization complete!")
+                print("="*60)
+            return
+
+        if skip_prompt:
+            # Non-interactive mode for Docker
+            print("✓ Database ready (no admin user created in non-interactive mode)")
+            print("  Create admin via: docker-compose exec app python manage.py create-admin <username>")
+            return
 
         # Check if we should create an admin user
         create_admin = input("\nCreate an admin user? (y/n): ").strip().lower()
@@ -68,4 +85,5 @@ def init_sqlite_db():
 
 
 if __name__ == '__main__':
-    init_sqlite_db()
+    skip = '--skip-prompt' in sys.argv
+    init_sqlite_db(skip_prompt=skip)

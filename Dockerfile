@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y \
 # Development stage
 FROM base as development
 
-COPY requirements-dev.txt .
+# Copy both requirements files (requirements-dev.txt includes requirements.txt)
+COPY requirements.txt requirements-dev.txt ./
 RUN pip install -r requirements-dev.txt
 
 COPY . .
