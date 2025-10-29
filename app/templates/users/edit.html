@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ user.username }} - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<h1>Edit User: {{ user.username }}</h1>
+
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" value="{{ user.username }}" disabled style="background: #ecf0f1; cursor: not-allowed;">
+            <small>Username cannot be changed</small>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="display_name">Display Name</label>
+            <input type="text" id="display_name" name="display_name" value="{{ user.display_name or '' }}">
+        </div>
+
+        <div class="form-group">
+            <input type="checkbox" id="is_active" name="is_active" class="checkbox" {% if user.is_active %}checked{% endif %} {% if user.id == current_user.id %}disabled{% endif %}>
+            <label for="is_active" style="display: inline;">Active</label>
+            {% if user.id == current_user.id %}
+            <small style="display: block; color: #e74c3c;">You cannot deactivate your own account</small>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <input type="checkbox" id="is_admin" name="is_admin" class="checkbox" {% if user.is_admin %}checked{% endif %} {% if user.id == current_user.id %}disabled{% endif %}>
+            <label for="is_admin" style="display: inline;">Administrator</label>
+            {% if user.id == current_user.id %}
+            <small style="display: block; color: #e74c3c;">You cannot change your own admin status</small>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn">Update User</button>
+            <a href="{{ url_for('api.view_user', user_id=user.id) }}" class="btn" style="background: #95a5a6;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

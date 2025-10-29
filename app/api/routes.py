@@ -2,11 +2,12 @@
 # ABOUTME: Provides CRUD operations for managing customers and their access keys
 
 from flask import render_template, request, jsonify, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.api import api_bp
 from app.auth.decorators import admin_required
 from app.services.customer_service import CustomerService
 from app.services.api_key_service import ApiKeyService
+from app.services.user_service import UserService
 
 
 @api_bp.route('/dashboard')
@@ -200,3 +201,147 @@ def api_list_keys(customer_id):
     """REST API: List API keys for a customer"""
     keys = ApiKeyService.get_customer_keys(customer_id)
     return jsonify([k.to_dict() for k in keys])
+
+
+# User Management Routes
+
+@api_bp.route('/users', methods=['GET'])
+@login_required
+@admin_required
+def list_users():
+    """List all users"""
+    users = UserService.get_all_users()
+    return render_template('users/list.html', users=users)
+
+
+@api_bp.route('/users/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_user():
+    """Create a new user"""
+    if request.method == 'POST':
+        data = request.form
+        try:
+            user = UserService.create_user(
+                username=data['username'],
+                email=data.get('email'),
+                display_name=data.get('display_name'),
+                is_admin=data.get('is_admin', 'off') == 'on',
+                is_active=data.get('is_active', 'on') == 'on'
+            )
+            flash(f'User {user.username} created successfully!', 'success')
+            return redirect(url_for('api.view_user', user_id=user.id))
+        except Exception as e:
+            flash(f'Error creating user: {str(e)}', 'danger')
+
+    return render_template('users/create.html')
+
+
+@api_bp.route('/users/<int:user_id>', methods=['GET'])
+@login_required
+@admin_required
+def view_user(user_id):
+    """View user details"""
+    user = UserService.get_user_by_id(user_id)
+    if not user:
+        flash('User not found', 'danger')
+        return redirect(url_for('api.list_users'))
+
+    return render_template('users/view.html', user=user)
+
+
+@api_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_user(user_id):
+    """Edit user details"""
+    user = UserService.get_user_by_id(user_id)
+    if not user:
+        flash('User not found', 'danger')
+        return redirect(url_for('api.list_users'))
+
+    # Prevent editing own admin status
+    if user.id == current_user.id and request.method == 'POST':
+        is_admin = request.form.get('is_admin', 'off') == 'on'
+        if not is_admin and user.is_admin:
+            flash('You cannot remove your own admin privileges', 'danger')
+            return redirect(url_for('api.edit_user', user_id=user_id))
+
+    if request.method == 'POST':
+        data = request.form
+        try:
+            UserService.update_user(
+                user_id,
+                email=data.get('email'),
+                display_name=data.get('display_name'),
+                is_active=data.get('is_active', 'off') == 'on',
+                is_admin=data.get('is_admin', 'off') == 'on'
+            )
+            flash(f'User {user.username} updated successfully!', 'success')
+            return redirect(url_for('api.view_user', user_id=user_id))
+        except Exception as e:
+            flash(f'Error updating user: {str(e)}', 'danger')
+
+    return render_template('users/edit.html', user=user)
+
+
+@api_bp.route('/users/<int:user_id>/toggle-admin', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_admin(user_id):
+    """Toggle admin status for a user"""
+    if user_id == current_user.id:
+        flash('You cannot change your own admin status', 'danger')
+        return redirect(url_for('api.view_user', user_id=user_id))
+
+    user = UserService.toggle_admin(user_id)
+    if user:
+        status = 'granted' if user.is_admin else 'revoked'
+        flash(f'Admin privileges {status} for {user.username}', 'success')
+    else:
+        flash('Error updating user', 'danger')
+
+    return redirect(url_for('api.view_user', user_id=user_id))
+
+
+@api_bp.route('/users/<int:user_id>/toggle-active', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_active(user_id):
+    """Toggle active status for a user"""
+    if user_id == current_user.id:
+        flash('You cannot deactivate your own account', 'danger')
+        return redirect(url_for('api.view_user', user_id=user_id))
+
+    user = UserService.toggle_active(user_id)
+    if user:
+        status = 'activated' if user.is_active else 'deactivated'
+        flash(f'User {user.username} {status}', 'success')
+    else:
+        flash('Error updating user', 'danger')
+
+    return redirect(url_for('api.view_user', user_id=user_id))
+
+
+@api_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    """Delete a user permanently"""
+    if user_id == current_user.id:
+        flash('You cannot delete your own account', 'danger')
+        return redirect(url_for('api.list_users'))
+
+    user = UserService.get_user_by_id(user_id)
+    if not user:
+        flash('User not found', 'danger')
+        return redirect(url_for('api.list_users'))
+
+    username = user.username
+
+    if UserService.delete_user(user_id):
+        flash(f'User {username} deleted successfully', 'success')
+    else:
+        flash('Error deleting user', 'danger')
+
+    return redirect(url_for('api.list_users'))

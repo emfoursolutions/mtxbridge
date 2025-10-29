@@ -41,6 +41,9 @@
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('api.dashboard') }}">Dashboard</a></li>
                 <li><a href="{{ url_for('api.list_customers') }}">Customers</a></li>
+                {% if current_user.is_admin %}
+                <li><a href="{{ url_for('api.list_users') }}">Users</a></li>
+                {% endif %}
                 <li><a href="{{ url_for('auth.profile') }}">Profile</a></li>
                 <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
                 {% else %}

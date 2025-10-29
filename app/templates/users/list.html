@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Users - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h1>Users</h1>
+    <a href="{{ url_for('api.create_user') }}" class="btn">Create User</a>
+</div>
+
+<div class="card">
+    {% if users %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Display Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>
+                    <strong>{{ user.username }}</strong>
+                    {% if user.id == current_user.id %}
+                    <span style="color: #3498db;">(You)</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.display_name or '-' }}</td>
+                <td>{{ user.email or '-' }}</td>
+                <td>
+                    {% if user.is_admin %}
+                    <span style="color: #e74c3c; font-weight: bold;">Admin</span>
+                    {% else %}
+                    User
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                    <span style="color: green;">Active</span>
+                    {% else %}
+                    <span style="color: red;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('api.view_user', user_id=user.id) }}" class="btn" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;">View</a>
+                    <a href="{{ url_for('api.edit_user', user_id=user.id) }}" class="btn" style="font-size: 0.85rem; padding: 0.25rem 0.5rem; background: #f39c12;">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No users found.</p>
+    {% endif %}
+</div>
+
+<div class="card" style="margin-top: 1rem; background: #ecf0f1;">
+    <h3>User Management Information</h3>
+    <ul>
+        <li><strong>Admins</strong> can manage customers, API keys, and other users</li>
+        <li><strong>Users</strong> can view information but cannot make changes</li>
+        <li>Users authenticate via LDAP/AD - usernames should match LDAP credentials</li>
+        <li>You cannot modify your own admin status or deactivate your own account</li>
+    </ul>
+</div>
+{% endblock %}

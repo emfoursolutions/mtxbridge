@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h1>User: {{ user.username }}</h1>
+    <div>
+        <a href="{{ url_for('api.edit_user', user_id=user.id) }}" class="btn">Edit</a>
+        <a href="{{ url_for('api.list_users') }}" class="btn" style="background: #95a5a6;">Back to List</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>User Details</h2>
+    <table>
+        <tr>
+            <th>Username</th>
+            <td>{{ user.username }}</td>
+        </tr>
+        <tr>
+            <th>Display Name</th>
+            <td>{{ user.display_name or 'Not set' }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ user.email or 'Not set' }}</td>
+        </tr>
+        <tr>
+            <th>LDAP DN</th>
+            <td>{{ user.dn or 'Not set' }}</td>
+        </tr>
+        <tr>
+            <th>Role</th>
+            <td>
+                {% if user.is_admin %}
+                <span style="color: #e74c3c; font-weight: bold;">Administrator</span>
+                {% else %}
+                User
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if user.is_active %}
+                <span style="color: green; font-weight: bold;">Active</span>
+                {% else %}
+                <span style="color: red; font-weight: bold;">Inactive</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Created</th>
+            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else 'Unknown' }}</td>
+        </tr>
+        <tr>
+            <th>Last Login</th>
+            <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never' }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if user.id != current_user.id %}
+<div class="card">
+    <h2>Actions</h2>
+
+    <div style="margin-bottom: 1rem;">
+        <form method="POST" action="{{ url_for('api.toggle_user_admin', user_id=user.id) }}" style="display: inline;">
+            <button type="submit" class="btn" style="background: #e74c3c;">
+                {% if user.is_admin %}
+                Revoke Admin Privileges
+                {% else %}
+                Grant Admin Privileges
+                {% endif %}
+            </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('api.toggle_user_active', user_id=user.id) }}" style="display: inline;">
+            <button type="submit" class="btn" style="background: #f39c12;">
+                {% if user.is_active %}
+                Deactivate User
+                {% else %}
+                Activate User
+                {% endif %}
+            </button>
+        </form>
+    </div>
+
+    <div style="border-top: 1px solid #ddd; padding-top: 1rem; margin-top: 1rem;">
+        <h3 style="color: #e74c3c;">Danger Zone</h3>
+        <form method="POST" action="{{ url_for('api.delete_user', user_id=user.id) }}" style="display: inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')">
+                Delete User Permanently
+            </button>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="card" style="background: #fff3cd; border: 1px solid #ffc107;">
+    <p><strong>Note:</strong> This is your account. You cannot modify your own admin status, deactivate, or delete your own account for security reasons.</p>
+</div>
+{% endif %}
+{% endblock %}
