@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Create API Key - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<h1>Create API Key for {{ customer.name }}</h1>
+
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="name">Key Name *</label>
+            <input type="text" id="name" name="name" placeholder="e.g., Production Key" required>
+            <small>A friendly name to identify this key</small>
+        </div>
+
+        <div class="form-group">
+            <h3>Permissions</h3>
+            <div>
+                <input type="checkbox" id="can_read" name="can_read" class="checkbox" checked>
+                <label for="can_read" style="display: inline;">Can Read (view streams)</label>
+            </div>
+            <div>
+                <input type="checkbox" id="can_publish" name="can_publish" class="checkbox">
+                <label for="can_publish" style="display: inline;">Can Publish (broadcast streams)</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="expires_in_days">Expires In (days)</label>
+            <input type="number" id="expires_in_days" name="expires_in_days" placeholder="Leave empty for no expiration">
+            <small>Optional: Number of days until this key expires</small>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>Important:</strong> The API key will be shown only once after creation. Make sure to copy it!
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn">Create API Key</button>
+            <a href="{{ url_for('api.view_customer', customer_id=customer.id) }}" class="btn" style="background: #95a5a6;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

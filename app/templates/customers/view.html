@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h1>{{ customer.name }}</h1>
+    <div>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('api.edit_customer', customer_id=customer.id) }}" class="btn">Edit</a>
+        {% endif %}
+        <a href="{{ url_for('api.list_customers') }}" class="btn">Back to List</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Customer Details</h2>
+    <table>
+        <tr>
+            <th>Email</th>
+            <td>{{ customer.email }}</td>
+        </tr>
+        <tr>
+            <th>Organization</th>
+            <td>{{ customer.organization or 'Not set' }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if customer.is_active %}
+                <span style="color: green;">Active</span>
+                {% else %}
+                <span style="color: red;">Inactive</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Created</th>
+            <td>{{ customer.created_at.strftime('%Y-%m-%d %H:%M:%S') if customer.created_at else 'Unknown' }}</td>
+        </tr>
+        <tr>
+            <th>Updated</th>
+            <td>{{ customer.updated_at.strftime('%Y-%m-%d %H:%M:%S') if customer.updated_at else 'Unknown' }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>API Keys</h2>
+        {% if current_user.is_admin and customer.is_active %}
+        <a href="{{ url_for('api.create_api_key', customer_id=customer.id) }}" class="btn">Create API Key</a>
+        {% endif %}
+    </div>
+
+    {% if api_keys %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Prefix</th>
+                <th>Permissions</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Used</th>
+                <th>Expires</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key in api_keys %}
+            <tr>
+                <td>{{ key.name }}</td>
+                <td><code>{{ key.key_prefix }}...</code></td>
+                <td>
+                    {% if key.can_publish %}Publish{% endif %}
+                    {% if key.can_publish and key.can_read %}, {% endif %}
+                    {% if key.can_read %}Read{% endif %}
+                </td>
+                <td>
+                    {% if key.is_active %}
+                    <span style="color: green;">Active</span>
+                    {% else %}
+                    <span style="color: red;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ key.created_at.strftime('%Y-%m-%d') if key.created_at else '-' }}</td>
+                <td>{{ key.last_used_at.strftime('%Y-%m-%d %H:%M') if key.last_used_at else 'Never' }}</td>
+                <td>{{ key.expires_at.strftime('%Y-%m-%d') if key.expires_at else 'Never' }}</td>
+                <td>
+                    {% if current_user.is_admin and key.is_active %}
+                    <form method="POST" action="{{ url_for('api.revoke_api_key', key_id=key.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;" onclick="return confirm('Are you sure you want to revoke this API key?')">Revoke</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No API keys yet. Create an API key to allow this customer to access streams.</p>
+    {% endif %}
+</div>
+{% endblock %}

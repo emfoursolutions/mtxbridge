@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<h1>User Profile</h1>
+
+<div class="card">
+    <h2>{{ current_user.display_name or current_user.username }}</h2>
+
+    <table>
+        <tr>
+            <th>Username</th>
+            <td>{{ current_user.username }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ current_user.email or 'Not set' }}</td>
+        </tr>
+        <tr>
+            <th>Role</th>
+            <td>{{ 'Administrator' if current_user.is_admin else 'User' }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ 'Active' if current_user.is_active else 'Inactive' }}</td>
+        </tr>
+        <tr>
+            <th>Last Login</th>
+            <td>{{ current_user.last_login.strftime('%Y-%m-%d %H:%M:%S') if current_user.last_login else 'Never' }}</td>
+        </tr>
+        <tr>
+            <th>Created</th>
+            <td>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') if current_user.created_at else 'Unknown' }}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

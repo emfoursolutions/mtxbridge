@@ -1,0 +1,21 @@
+# ABOUTME: Development and testing dependencies for MediaMTX control plane
+# ABOUTME: Includes testing frameworks, linters, and development tools
+
+-r requirements.txt
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-flask==1.3.0
+pytest-mock==3.12.0
+faker==22.0.0
+
+# Code Quality
+ruff==0.1.9
+black==23.12.1
+mypy==1.8.0
+pre-commit==3.6.0
+
+# Development
+ipython==8.19.0
+flask-debugtoolbar==0.14.1

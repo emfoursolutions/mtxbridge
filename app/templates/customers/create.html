@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Create Customer - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<h1>Create Customer</h1>
+
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="organization">Organization</label>
+            <input type="text" id="organization" name="organization">
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn">Create Customer</button>
+            <a href="{{ url_for('api.list_customers') }}" class="btn" style="background: #95a5a6;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

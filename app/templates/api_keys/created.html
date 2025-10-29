@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}API Key Created - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<h1>API Key Created Successfully!</h1>
+
+<div class="card">
+    <div class="alert alert-success">
+        <strong>Success!</strong> Your API key has been created.
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>Important:</strong> This is the only time you'll see this key. Copy it now and store it securely!
+    </div>
+
+    <h2>API Key Details</h2>
+
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+        <p><strong>Name:</strong> {{ api_key.name }}</p>
+        <p><strong>Customer:</strong> {{ customer.name }}</p>
+        <p><strong>Permissions:</strong>
+            {% if api_key.can_publish %}Publish{% endif %}
+            {% if api_key.can_publish and api_key.can_read %}, {% endif %}
+            {% if api_key.can_read %}Read{% endif %}
+        </p>
+        {% if api_key.expires_at %}
+        <p><strong>Expires:</strong> {{ api_key.expires_at.strftime('%Y-%m-%d') }}</p>
+        {% endif %}
+    </div>
+
+    <h3>Your API Key</h3>
+    <div style="background: #2c3e50; color: #fff; padding: 1rem; border-radius: 4px; font-family: monospace; word-break: break-all; margin: 1rem 0;">
+        {{ plaintext_key }}
+    </div>
+
+    <button class="btn" onclick="copyToClipboard('{{ plaintext_key }}')">Copy to Clipboard</button>
+
+    <h3 style="margin-top: 2rem;">Usage Examples</h3>
+
+    <p><strong>RTSP with query parameter:</strong></p>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">rtsp://server:8554/stream/path?api_key={{ plaintext_key }}</pre>
+
+    <p><strong>RTSP with username:</strong></p>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">rtsp://{{ plaintext_key }}@server:8554/stream/path</pre>
+
+    <p><strong>RTSP with password:</strong></p>
+    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">rtsp://user:{{ plaintext_key }}@server:8554/stream/path</pre>
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('api.view_customer', customer_id=customer.id) }}" class="btn">Back to Customer</a>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('API key copied to clipboard!');
+    }, function(err) {
+        alert('Failed to copy: ' + err);
+    });
+}
+</script>
+{% endblock %}

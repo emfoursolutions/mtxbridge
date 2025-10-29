@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Login - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 2rem auto;">
+    <div class="card">
+        <h1>Login</h1>
+        <p>Sign in with your AD/LDAP credentials</p>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(class="form-control") }}
+                {% if form.username.errors %}
+                    <span style="color: red;">{{ form.username.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+                {% if form.password.errors %}
+                    <span style="color: red;">{{ form.password.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            {% if form.remember_me is defined %}
+            <div class="form-group">
+                {{ form.remember_me(class="checkbox") }}
+                {{ form.remember_me.label }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

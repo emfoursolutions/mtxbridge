@@ -1,0 +1,25 @@
+# ABOUTME: MediaMTX server configuration with external authentication
+# ABOUTME: Points to Flask app for validating stream access via API keys
+
+# API and metrics
+api: yes
+apiAddress: :9997
+
+# Playback server
+playback: yes
+playbackAddress: :9996
+
+# External authentication
+externalAuthenticationURL: http://app:5000/api/mediamtx/auth
+
+# Paths
+paths:
+  all:
+    # Enable external auth for all paths
+    readUser: ""
+    readPass: ""
+    readIPs: []
+
+    publishUser: ""
+    publishPass: ""
+    publishIPs: []

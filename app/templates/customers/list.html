@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Customers - MediaMTX Control Plane{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h1>Customers</h1>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('api.create_customer') }}" class="btn">Create Customer</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    {% if customers %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Organization</th>
+                <th>API Keys</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.organization or '-' }}</td>
+                <td>{{ customer.api_keys.count() }}</td>
+                <td>
+                    {% if customer.is_active %}
+                    <span style="color: green;">Active</span>
+                    {% else %}
+                    <span style="color: red;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ customer.created_at.strftime('%Y-%m-%d') if customer.created_at else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('api.view_customer', customer_id=customer.id) }}" class="btn" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No customers found. Create your first customer to get started!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+# ABOUTME: Docker Compose configuration for local development and testing
+# ABOUTME: Orchestrates Flask app, PostgreSQL, and optional MediaMTX containers
+
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: mtxman
+      POSTGRES_USER: mtxman
+      POSTGRES_PASSWORD: mtxman_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mtxman"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: development
+    environment:
+      FLASK_APP: app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://mtxman:mtxman_password@db:5432/mtxman
+      SECRET_KEY: dev-secret-key-change-in-production
+      LDAP_HOST: ${LDAP_HOST:-ldap://your-ad-server}
+      LDAP_PORT: ${LDAP_PORT:-389}
+      LDAP_BASE_DN: ${LDAP_BASE_DN:-dc=example,dc=com}
+      LDAP_BIND_USER_DN: ${LDAP_BIND_USER_DN}
+      LDAP_BIND_USER_PASSWORD: ${LDAP_BIND_USER_PASSWORD}
+      MEDIAMTX_WEBHOOK_SECRET: ${MEDIAMTX_WEBHOOK_SECRET:-shared-secret}
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python app.py
+
+  # Optional: MediaMTX server for testing
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    ports:
+      - "8554:8554"  # RTSP
+      - "1935:1935"  # RTMP
+      - "8888:8888"  # HLS
+      - "8889:8889"  # WebRTC
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+    environment:
+      - MTX_PROTOCOLS=tcp
+    profiles:
+      - with-mediamtx
+
+volumes:
+  postgres_data:

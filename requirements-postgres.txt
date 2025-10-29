@@ -1,0 +1,7 @@
+# ABOUTME: Additional dependencies for PostgreSQL database support
+# ABOUTME: Install these if using PostgreSQL instead of SQLite
+
+-r requirements.txt
+
+# PostgreSQL driver
+psycopg2-binary==2.9.9
