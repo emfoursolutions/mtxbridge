@@ -94,10 +94,17 @@ class LDAPService:
                 return None
 
             # Authentication successful, extract user info
+            email = None
+            if hasattr(user_entry, 'mail'):
+                email_value = str(user_entry.mail)
+                # Handle empty arrays or empty strings from LDAP
+                if email_value and email_value not in ('[]', '', '[ ]'):
+                    email = email_value
+
             user_info = {
                 'username': username,
                 'dn': user_dn,
-                'email': str(user_entry.mail) if hasattr(user_entry, 'mail') else None,
+                'email': email,
                 'display_name': str(user_entry.displayName) if hasattr(user_entry, 'displayName') else str(user_entry.cn),
             }
 

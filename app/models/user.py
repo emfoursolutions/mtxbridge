@@ -13,7 +13,7 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    email = db.Column(db.String(255), unique=True, nullable=True)
+    email = db.Column(db.String(255), nullable=True, index=True)
     display_name = db.Column(db.String(255), nullable=True)
     dn = db.Column(db.String(500), nullable=True)  # LDAP Distinguished Name
     is_active = db.Column(db.Boolean, default=True, nullable=False)
