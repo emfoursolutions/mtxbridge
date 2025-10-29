@@ -30,7 +30,7 @@ class ApiKey(db.Model):
         return f'<ApiKey {self.name} ({self.key_prefix}...)>'
 
     @staticmethod
-    def generate_key(prefix='mtx_', length=32):
+    def generate_key(prefix='mtx_', length=8):
         """Generate a new random API key"""
         random_part = secrets.token_urlsafe(length)
         return f"{prefix}{random_part}"
